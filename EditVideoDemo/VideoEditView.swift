@@ -124,6 +124,7 @@ struct VideoEditView: View {
     
     private func saveInLibraryAndUpdatePlayer(_ url: URL) {
         featureType = .none
+        player?.pause()
         player = AVPlayer(url: url)
         player?.seek(to: .zero) { success in
             player?.play()
