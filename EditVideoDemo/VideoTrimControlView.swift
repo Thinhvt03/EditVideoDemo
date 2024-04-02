@@ -10,11 +10,10 @@ import AVFoundation
 
 struct VideoTrimControlView: UIViewRepresentable {
     var avAsset: AVAsset
-    @EnvironmentObject var videoEditor: VideoEditorManager
     @Binding var player: AVPlayer?
-    @Binding var startTime: String
-    @Binding var currentTime: String
-    @Binding var endTime: String
+    @Binding var startTime: CMTime
+    @Binding var currentTime: CMTime
+    @Binding var endTime: CMTime
     
     func makeUIView(context: Context) -> some VideoTrimmer {
         return context.coordinator.initVideoTrimmer()
@@ -61,17 +60,9 @@ struct VideoTrimControlView: UIViewRepresentable {
         
         func updateTimeLineText() {
             DispatchQueue.main.async { [self] in
-                let startTime = videoTrimmer.selectedRange.start
-                let currentTime = videoTrimmer.progress
-                let endTime = videoTrimmer.selectedRange.end
-                
-                parent.startTime = startTime.displayString
-                parent.currentTime = currentTime.displayString
-                parent.endTime = endTime.displayString
-                
-                parent.videoEditor.startTime = startTime
-                parent.videoEditor.currentTime = currentTime
-                parent.videoEditor.endTime = endTime
+                parent.startTime = videoTrimmer.selectedRange.start
+                parent.currentTime = videoTrimmer.progress
+                parent.endTime = videoTrimmer.selectedRange.end
             }
         }
         
@@ -136,7 +127,7 @@ struct VideoTrimControlView: UIViewRepresentable {
 }
 
 extension CMTime {
-    var displayString: String {
+    var convertCMTimeToString: String {
         let offset = TimeInterval(seconds)
         let numberOfNanosecondsFloat = (offset - TimeInterval(Int(offset))) * 100.0
         let nanoseconds = Int(numberOfNanosecondsFloat)

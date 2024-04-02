@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct VideoCollection: View {
-    @EnvironmentObject var videoEditor: VideoEditorManager
     @EnvironmentObject var photoLibraryManager: PhotoLibraryManager
+    private var videoEditorManager = VideoEditorManager.shared
     private let columns: [GridItem] = {
         var columns = [GridItem]()
         for _ in 0..<3 {
@@ -24,7 +24,6 @@ struct VideoCollection: View {
                 ForEach(photoLibraryManager.videoAssets, id: \.self) { asset in
                     NavigationLink {
                         VideoEditView(asset: asset)
-                            .environmentObject(videoEditor)
                             .environmentObject(photoLibraryManager)
                     } label: {
                         VideoGridItem(asset: asset)

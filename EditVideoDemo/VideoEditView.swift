@@ -10,21 +10,22 @@ import AVKit
 import PhotosUI
 
 struct VideoEditView: View {
-    @State var startTime = "00:00:00"
-    @State var currentTime = "00:00:00"
-    @State var endTime = "00:00:00"
+    @State var startTime = CMTime.zero
+    @State var currentTime = CMTime.zero
+    @State var endTime = CMTime.zero
     @State private var player: AVPlayer?
     @State private var avAsset: AVAsset?
-    @EnvironmentObject var videoEditor: VideoEditorManager
     @EnvironmentObject var photoLibraryManager: PhotoLibraryManager
+    var videoEditorManager = VideoEditorManager.shared
     var asset: Asset?
     
     enum FeatureType: String, CaseIterable {
-        case none, trim, addText, addAudio, mergeVideos
+        case none, effect, trim, addText, addAudio, mergeVideos
         var title: String { rawValue.capitalized }
     }
      
     @State private var featureType: FeatureType = .none
+    @State private var filterName: EffectName = .sharpenLuminance
     @State private var textToVideo = ""
     
     var body: some View {
@@ -34,20 +35,27 @@ struct VideoEditView: View {
             
             switch featureType {
             case .none: EmptyView()
+            case .effect:
+                Picker("Picker Add Filter", selection: $filterName) {
+                    ForEach(EffectName.allCases, id: \.self) { item in
+                        Text(item.name).tag(item)
+                    }
+                }
+                .pickerStyle(.wheel)
+                .padding()
             case .trim:
                 if avAsset != nil && player != nil {
                     VideoTrimControlView(avAsset: avAsset!, player: $player,
                                          startTime: $startTime, currentTime: $currentTime, endTime: $endTime)
-                    .environmentObject(videoEditor)
                     .frame(height: 60)
                     
                     HStack {
                         Group {
-                            Text(startTime)
+                            Text(startTime.convertCMTimeToString)
                             Spacer()
-                            Text(currentTime)
+                            Text(currentTime.convertCMTimeToString)
                             Spacer()
-                            Text(endTime)
+                            Text(endTime.convertCMTimeToString)
                         }
                         .font(.subheadline)
                     }.padding(.horizontal)
@@ -60,7 +68,7 @@ struct VideoEditView: View {
             case .addAudio:
                 Text("Touch Save Button to save sample audio in video ")
             case .mergeVideos:
-                Text("Unfinished feature ")
+                Text("Touch Save Button to merge videos ")
             }
             
             Picker("Picker", selection: $featureType) {
@@ -74,24 +82,30 @@ struct VideoEditView: View {
             Button("Save") {
                 guard let avAsset else { return }
                 switch featureType {
-                case .none:
-                    break
+                case .none: break
+                case .effect:
+                    videoEditorManager.addEffectToVideo(avAsset, effectName: filterName.name) { url in
+                        saveInLibraryAndUpdatePlayer(url)
+                    }
                 case .trim:
-                    videoEditor.trimVideo(avAsset, startTime: videoEditor.startTime, endTime: videoEditor.endTime) { url in
+                    videoEditorManager.trimVideo(avAsset, startTime: startTime, endTime: endTime) { url in
                         saveInLibraryAndUpdatePlayer(url)
                     }
                 case .addText:
                     guard !textToVideo.isEmpty else { return }
-                    videoEditor.addTextToVideo(avAsset, title: textToVideo, startTime: videoEditor.startTime, endTime: videoEditor.endTime) { url in
+                    videoEditorManager.addTextToVideo(avAsset, title: textToVideo, startTime: startTime, endTime: endTime) { url in
                         saveInLibraryAndUpdatePlayer(url)
                     }
                 case .addAudio:
                     let avAudioAsset = AVAsset(url: Bundle.main.url(forResource: "sampleAudio", withExtension: "mp3")!)
-                    videoEditor.addAudioToVideo(avAsset, audioAsset: avAudioAsset) { url in
+                    videoEditorManager.addAudioToVideo(avAsset, audioAsset: avAudioAsset) { url in
                         saveInLibraryAndUpdatePlayer(url)
                     }
                 case .mergeVideos:
-                    break
+                    let avAsset2 = AVAsset(url: Bundle.main.url(forResource: "sampleVideo", withExtension: "mp4")!)
+                    videoEditorManager.mergeTwoVideos([avAsset, avAsset2]) { url in
+                        saveInLibraryAndUpdatePlayer(url)
+                    }
                 }
             }
             .buttonStyle(.borderedProminent)
@@ -106,6 +120,10 @@ struct VideoEditView: View {
                     self.avAsset = avAsset
                 }
             }
+        }
+        .onDisappear {
+            player?.pause()
+            videoEditorManager.deleteTempDirectory()
         }
     }
     
@@ -130,5 +148,6 @@ struct VideoEditView: View {
             player?.play()
         }
 //        photoLibraryManager.saveVideoToLibrary(url)
+        print("Saved in photos library")
     }
 }

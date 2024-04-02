@@ -10,12 +10,10 @@ import SwiftUI
 @main
 struct EditVideoDemoApp: App {
     @StateObject private var photoLibraryManager = PhotoLibraryManager()
-    @StateObject private var videoEditor = VideoEditorManager()
     var body: some Scene {
         WindowGroup {
             NavigationView {
                 VideoCollection()
-                    .environmentObject(videoEditor)
                     .environmentObject(photoLibraryManager)
             }
         }
