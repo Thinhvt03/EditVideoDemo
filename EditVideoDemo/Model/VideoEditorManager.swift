@@ -39,7 +39,7 @@ class VideoEditorManager: NSObject {
     }
     
     func addTextToVideo(_ asset: AVAsset, title: String, startTime: CMTime, endTime: CMTime, completionHandler: @escaping (URL) -> Void) {
-        let timeRange = CMTimeRangeFromTimeToTime(start: startTime, end: endTime)
+        let addTextTimeimeRange = CMTimeRangeFromTimeToTime(start: startTime, end: endTime)
         let videoTrack = asset.tracks( withMediaType: .video ).first! as AVAssetTrack
         let naturalSize = CGSize(
             width: videoTrack.naturalSize.width,
@@ -62,22 +62,22 @@ class VideoEditorManager: NSObject {
         parentlayer.frame = CGRect(x: 0, y: 0, width: renderWidth, height: renderHeight)
         
         parentlayer.addSublayer(videolayer)
-        videolayer.addSublayer(titleLayer)
-        
-        let mutableVideoComposition = AVMutableVideoComposition()
-        mutableVideoComposition.renderSize = naturalSize
-        mutableVideoComposition.frameDuration = CMTime(value: 1, timescale: videoTrack.naturalTimeScale)
-        mutableVideoComposition.animationTool = AVVideoCompositionCoreAnimationTool(
-            postProcessingAsVideoLayer: videolayer, in: parentlayer
-        )
+        parentlayer.addSublayer(titleLayer)
         
         let transformer = AVMutableVideoCompositionLayerInstruction(assetTrack: videoTrack)
         transformer.setOpacity(1.0, at: CMTime.zero)
         
         let instruction = AVMutableVideoCompositionInstruction()
-        instruction.timeRange = timeRange
+        instruction.timeRange = addTextTimeimeRange
         instruction.layerInstructions = [transformer]
+        
+        let mutableVideoComposition = AVMutableVideoComposition()
+        mutableVideoComposition.renderSize = naturalSize
         mutableVideoComposition.instructions = [instruction]
+        mutableVideoComposition.frameDuration = CMTime(value: 1, timescale: 30)
+        mutableVideoComposition.animationTool = AVVideoCompositionCoreAnimationTool(
+            postProcessingAsVideoLayer: videolayer, in: parentlayer
+        )
         
         let outputURL = createTemporaryDirectory(subPath: "videoText")
         self.exportSession(asset, outputURL: outputURL, outputFileType: .mp4, videoComposition: mutableVideoComposition) { outputURL in
