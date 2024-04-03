@@ -15,6 +15,7 @@ struct VideoEditView: View {
     @State var endTime = CMTime.zero
     @State private var player: AVPlayer?
     @State private var avAsset: AVAsset?
+    @State private var assetUrl: URL?
     @EnvironmentObject var photoLibraryManager: PhotoLibraryManager
     var videoEditorManager = VideoEditorManager.shared
     var asset: Asset?
@@ -79,36 +80,51 @@ struct VideoEditView: View {
             .pickerStyle(.segmented)
             .padding()
             
-            Button("Save") {
-                guard let avAsset else { return }
-                switch featureType {
-                case .none: break
-                case .effect:
-                    videoEditorManager.addEffectToVideo(avAsset, effectName: filterName.name) { url in
-                        saveInLibraryAndUpdatePlayer(url)
-                    }
-                case .trim:
-                    videoEditorManager.trimVideo(avAsset, startTime: startTime, endTime: endTime) { url in
-                        saveInLibraryAndUpdatePlayer(url)
-                    }
-                case .addText:
-                    guard !textToVideo.isEmpty else { return }
-                    videoEditorManager.addTextToVideo(avAsset, title: textToVideo, startTime: startTime, endTime: endTime) { url in
-                        saveInLibraryAndUpdatePlayer(url)
-                    }
-                case .addAudio:
-                    let avAudioAsset = AVAsset(url: Bundle.main.url(forResource: "sampleAudio", withExtension: "mp3")!)
-                    videoEditorManager.addAudioToVideo(avAsset, audioAsset: avAudioAsset) { url in
-                        saveInLibraryAndUpdatePlayer(url)
-                    }
-                case .mergeVideos:
-                    let avAsset2 = AVAsset(url: Bundle.main.url(forResource: "sampleVideo", withExtension: "mp4")!)
-                    videoEditorManager.mergeTwoVideos([avAsset, avAsset2]) { url in
-                        saveInLibraryAndUpdatePlayer(url)
+            HStack {
+                Button("Cancel") {
+                    featureType = .none
+                }
+                
+                Button("Done") {
+                    guard let avAsset else { return }
+                    switch featureType {
+                    case .none: break
+                    case .effect:
+                        videoEditorManager.addEffectToVideo(avAsset, effectName: filterName.name) { url in
+                            updatePlayer(url)
+                        }
+                    case .trim:
+                        videoEditorManager.trimVideo(avAsset, startTime: startTime, endTime: endTime) { url in
+                            updatePlayer(url)
+                        }
+                    case .addText:
+                        guard !textToVideo.isEmpty else { return }
+                        videoEditorManager.addTextToVideo(avAsset, title: textToVideo, startTime: startTime, endTime: endTime) { url in
+                            updatePlayer(url)
+                        }
+                    case .addAudio:
+                        let avAudioAsset = AVAsset(url: Bundle.main.url(forResource: "sampleAudio", withExtension: "mp3")!)
+                        videoEditorManager.addAudioToVideo(avAsset, audioAsset: avAudioAsset) { url in
+                            updatePlayer(url)
+                        }
+                    case .mergeVideos:
+                        let avAsset2 = AVAsset(url: Bundle.main.url(forResource: "sampleVideo2", withExtension: "mp4")!)
+                        videoEditorManager.mergeTwoVideos([avAsset, avAsset2]) { url in
+                            updatePlayer(url)
+                        }
                     }
                 }
+                
+                Button("Save") {
+                    if let assetUrl {
+                        photoLibraryManager.saveVideoToLibrary(assetUrl)
+                        self.assetUrl = nil
+                    }
+                }
+                .disabled(assetUrl == nil ? true : false)
             }
             .buttonStyle(.borderedProminent)
+            
             Spacer()
         }
         .navigationTitle("Edit Video")
@@ -135,19 +151,19 @@ struct VideoEditView: View {
                                                    resultHandler: { playerItem, _ in
             DispatchQueue.main.async {
                 player = AVPlayer(playerItem: playerItem)
-                player?.play()
+//                player?.play()
             }
         })
     }
     
-    private func saveInLibraryAndUpdatePlayer(_ url: URL) {
+    private func updatePlayer(_ url: URL) {
         featureType = .none
         player?.pause()
         player = AVPlayer(url: url)
         player?.seek(to: .zero) { success in
             player?.play()
         }
-//        photoLibraryManager.saveVideoToLibrary(url)
-        print("Saved in photos library")
+        self.assetUrl = url
+        self.avAsset = AVAsset(url: url)
     }
 }

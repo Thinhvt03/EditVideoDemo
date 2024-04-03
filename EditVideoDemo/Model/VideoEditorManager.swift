@@ -9,8 +9,6 @@ import UIKit
 import Photos
 import AVFoundation
 
-var defaultSize = CGSize(width: 1920, height: 1080)
-
 class VideoEditorManager: NSObject {
     static var shared = VideoEditorManager()
     private let fileManager = FileManager.default
@@ -89,6 +87,7 @@ class VideoEditorManager: NSObject {
     
     func addAudioToVideo(_ videoAsset: AVAsset, audioAsset: AVAsset, completionHandler: @escaping (URL) -> Void) {
         let mixComposition = AVMutableComposition()
+        var instruction = AVMutableVideoCompositionInstruction()
         var mutableCompositionVideoTrack: [AVMutableCompositionTrack] = []
         var mutableCompositionAudioTrack: [AVMutableCompositionTrack] = []
         
@@ -103,7 +102,18 @@ class VideoEditorManager: NSObject {
         guard let videoAssetTrack = videoAsset.tracks(withMediaType: .video).first,
               let audioAssetTrack = audioAsset.tracks(withMediaType: .audio).first
         else { return }
+        
+        let naturalSize = CGSize(
+            width: videoAssetTrack.naturalSize.width,
+            height: videoAssetTrack.naturalSize.height
+        )
         let timeRange = CMTimeRangeMake(start: .zero, duration: videoAssetTrack.timeRange.duration)
+        
+        instruction = AVMutableComposition.instruction(
+            videoAssetTrack, startTime: .zero,
+            duration: videoAssetTrack.timeRange.duration,
+            maxRenderSize: naturalSize
+        ).videoCompositionInstruction
         
         do {
             try mutableCompositionVideoTrack.first?.insertTimeRange(timeRange, of: videoAssetTrack, at: CMTime.zero)
@@ -114,14 +124,6 @@ class VideoEditorManager: NSObject {
             print(error.localizedDescription)
         }
         
-        let instruction = AVMutableVideoCompositionInstruction()
-        instruction.timeRange = timeRange
-        instruction.backgroundColor = UIColor.clear.cgColor
-        
-        let naturalSize = CGSize(
-            width: videoAssetTrack.naturalSize.width,
-            height: videoAssetTrack.naturalSize.height
-        )
         let mutableVideoComposition = AVMutableVideoComposition()
         mutableVideoComposition.frameDuration = CMTimeMake(value: 1, timescale: 30)
         mutableVideoComposition.renderSize = naturalSize
@@ -135,21 +137,40 @@ class VideoEditorManager: NSObject {
     
     func mergeTwoVideos(_ assets: [AVAsset], completionHandler: @escaping (URL) -> Void) {
         let mixComposition = AVMutableComposition()
-        let mutableVideoComposition = AVMutableVideoComposition()
-        let instructions: [AVMutableVideoCompositionInstruction] = []
+        var instructions: [AVMutableVideoCompositionInstruction] = []
         
         let compositionVideoTrack = mixComposition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid)
         let compositionAudioTrack = mixComposition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid)
 //        compositionVideoTrack?.preferredTransform = CGAffineTransform(rotationAngle: .pi / 2)
         
         var timetoAddVideo = CMTime.zero
+        var renderSize = CGSize.zero
+        
         assets.forEach { asset in
-            do {
-                let videoAssetTrack = asset.tracks(withMediaType: .video).first!
-                let audioAssetTrack = asset.tracks(withMediaType: .audio).first!
+            let videoAssetTrack = asset.tracks(withMediaType: .video).first!
+            let audioAssetTrack = asset.tracks(withMediaType: .audio).first
+            
+            let naturalSize = CGSize(
+                width: videoAssetTrack.naturalSize.width,
+                height: videoAssetTrack.naturalSize.height
+            )
+            
+            if asset == assets.first {
+                let instruction = AVMutableComposition.instruction(videoAssetTrack, startTime: timetoAddVideo, duration: videoAssetTrack.timeRange.duration, maxRenderSize: naturalSize)
+                instructions.append(instruction.videoCompositionInstruction)
                 
-                try compositionVideoTrack?.insertTimeRange(asset.fullRange, of: videoAssetTrack, at: timetoAddVideo)
-                try compositionAudioTrack?.insertTimeRange(asset.fullRange, of: audioAssetTrack, at: timetoAddVideo)
+                renderSize = instruction.isPortrait ? CGSize(width: naturalSize.height, height: naturalSize.width) : CGSize(width: naturalSize.width, height: naturalSize.height)
+            } else {
+                let instruction = AVMutableComposition.instruction(videoAssetTrack, startTime: timetoAddVideo, duration: videoAssetTrack.timeRange.duration, maxRenderSize: naturalSize, scale: 1)
+                instructions.append(instruction.videoCompositionInstruction)
+            }
+            
+            do {
+                let timeRange = CMTimeRangeMake(start: .zero, duration: videoAssetTrack.timeRange.duration)
+                try compositionVideoTrack?.insertTimeRange(timeRange, of: videoAssetTrack, at: timetoAddVideo)
+                if let audioAssetTrack {
+                    try compositionAudioTrack?.insertTimeRange(timeRange, of: audioAssetTrack, at: timetoAddVideo)
+                }
                 
                 timetoAddVideo = CMTimeAdd(timetoAddVideo, videoAssetTrack.timeRange.duration)
             } catch {
@@ -157,9 +178,10 @@ class VideoEditorManager: NSObject {
             }
         }
         
-        mutableVideoComposition.frameDuration = CMTimeMake(value: 1, timescale: 30)
-        mutableVideoComposition.renderSize = defaultSize
+        let mutableVideoComposition = AVMutableVideoComposition()
+        mutableVideoComposition.renderSize = renderSize
         mutableVideoComposition.instructions = instructions
+        mutableVideoComposition.frameDuration = CMTimeMake(value: 1, timescale: 30)
         
         let outputURL = createTemporaryDirectory(subPath: "mergeVideos")
         self.exportSession(mixComposition, outputURL: outputURL, outputFileType: .mp4, videoComposition: mutableVideoComposition) { outputURL in
@@ -175,7 +197,6 @@ class VideoEditorManager: NSObject {
                 asset: asset, presetName: AVAssetExportPresetHighestQuality) else { return }
             exporter.videoComposition = videoComposition
             exporter.outputURL = outputURL
-            exporter.shouldOptimizeForNetworkUse = true
             exporter.outputFileType = outputFileType
             if timeRange != nil {
                 exporter.timeRange = timeRange!
@@ -184,6 +205,7 @@ class VideoEditorManager: NSObject {
             exporter.exportAsynchronously { [weak exporter] in
                 switch exporter!.status {
                 case .completed :
+                    print("success")
                     completionHandler(outputURL)
                 default:
                     if let error = exporter?.error {
@@ -222,5 +244,53 @@ extension URL {
         } else {
             URL(fileURLWithPath: path)
         }
+    }
+}
+
+extension AVMutableComposition {
+    static func instruction(_ assetTrack: AVAssetTrack, startTime: CMTime, duration: CMTime, maxRenderSize: CGSize, scale: CGFloat = 1)
+        -> (videoCompositionInstruction: AVMutableVideoCompositionInstruction, isPortrait: Bool) {
+            let layerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: assetTrack)
+            let assetInfo = orientationFromTransform(assetTrack.preferredTransform)
+            var scaleRatio = maxRenderSize.width / assetTrack.naturalSize.width
+            if assetInfo.isPortrait {
+                scaleRatio = maxRenderSize.height / assetTrack.naturalSize.height
+            }
+
+            var transform = CGAffineTransform(scaleX: scaleRatio * scale, y: scaleRatio * scale)
+            transform = assetTrack.preferredTransform.concatenating(transform)
+            layerInstruction.setTransform(transform, at: .zero)
+            
+            let videoCompositionInstruction = AVMutableVideoCompositionInstruction()
+            videoCompositionInstruction.timeRange = CMTimeRangeMake(start: startTime, duration: duration)
+            videoCompositionInstruction.layerInstructions = [layerInstruction]
+            
+            return (videoCompositionInstruction, assetInfo.isPortrait)
+    }
+    
+    static func orientationFromTransform(_ transform: CGAffineTransform) -> (orientation: UIImage.Orientation, isPortrait: Bool) {
+        var assetOrientation = UIImage.Orientation.up
+        var isPortrait = false
+        
+        switch [transform.a, transform.b, transform.c, transform.d] {
+        case [0.0, 1.0, -1.0, 0.0]:
+            assetOrientation = .right
+            isPortrait = true
+            
+        case [0.0, -1.0, 1.0, 0.0]:
+            assetOrientation = .left
+            isPortrait = true
+            
+        case [1.0, 0.0, 0.0, 1.0]:
+            assetOrientation = .up
+            
+        case [-1.0, 0.0, 0.0, -1.0]:
+            assetOrientation = .down
+
+        default:
+            break
+        }
+    
+        return (assetOrientation, isPortrait)
     }
 }
