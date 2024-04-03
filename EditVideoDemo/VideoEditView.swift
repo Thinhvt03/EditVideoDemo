@@ -134,6 +134,7 @@ struct VideoEditView: View {
                 requestPlayerItem(asset.asset)
                 asset.requestAVAsset { avAsset in
                     self.avAsset = avAsset
+                    endTime = avAsset.fullRange.duration
                 }
             }
         }
