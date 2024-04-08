@@ -18,6 +18,14 @@ struct VideoEditView: View {
     @State private var assetUrl: URL?
     @EnvironmentObject var photoLibraryManager: PhotoLibraryManager
     var videoEditorManager = VideoEditorManager.shared
+    @State private var isDocumentPicker = false
+    @State private var isImagePicker = false
+    @State private var selectedAudioURL: URL?
+    @State private var isProgressView = false
+    @State private var isWaveformView = false
+    @State private var audioData: [Float] = []
+    @State private var phAssets: [PHAsset] = []
+    @State private var assetUrls: [URL] = []
     var asset: Asset?
     
     enum FeatureType: String, CaseIterable {
@@ -28,11 +36,27 @@ struct VideoEditView: View {
     @State private var featureType: FeatureType = .none
     @State private var filterName: EffectName = .sharpenLuminance
     @State private var textToVideo = ""
+    @State private var textLocation = CGPoint.zero
+    @State private var textSize = CGSize(width: 130, height: 50)
     
     var body: some View {
         VStack {
             VideoPlayer(player: player)
                 .frame(height: 300)
+                .overlay {
+                    if featureType == .addText {
+                        TextView(text: $textToVideo, textSize: $textSize, textLocation: $textLocation)
+                    }
+                    
+                    if isProgressView {
+                        ProgressView {
+                            Text("Progressing Video...")
+                                .font(.caption)
+                        }
+                            .padding()
+                            .background(Color.black.opacity(0.8))
+                    }
+                }
             
             switch featureType {
             case .none: EmptyView()
@@ -61,15 +85,45 @@ struct VideoEditView: View {
                         .font(.subheadline)
                     }.padding(.horizontal)
                 }
-            case .addText:
-                TextField(" Enter text", text: $textToVideo)
-                    .frame(height: 40)
-                    .border(.gray, width: 1)
-                    .padding()
+            case .addText, .mergeVideos:
+                HStack(spacing: 1) {
+                    Color.gray
+                        .frame(width: 60, height: 60)
+                        .overlay {
+                            Button {
+                                isImagePicker.toggle()
+                            } label: {
+                                Image(systemName: "plus")
+                            }
+                        }
+                   
+                    LazyHGrid(rows: [GridItem(.fixed(20))], spacing: 1) {
+                        ForEach(phAssets, id: \.self) { asset in
+                            VideoGridItem(asset: Asset(asset: asset))
+                                .aspectRatio(1, contentMode: .fill)
+                                .frame(width: 60, height: 60)
+                                .clipped()
+                        }
+                    }
+                }
             case .addAudio:
-                Text("Touch Save Button to save sample audio in video ")
-            case .mergeVideos:
-                Text("Touch Save Button to merge videos ")
+                VStack {
+                    Button("Select Audio") {
+                        isDocumentPicker.toggle()
+                    }
+                    
+                    if selectedAudioURL != nil {
+                        AudioWaveformView(url: $selectedAudioURL, isLoading: $isWaveformView)
+                            .frame(height: 50)
+                            .border(Color.gray, width: 1.0)
+                            .overlay {
+                                if !isWaveformView {
+                                    ProgressView()
+                                }
+                            }
+                            .padding()
+                    }
+                }
             }
             
             Picker("Picker", selection: $featureType) {
@@ -81,36 +135,51 @@ struct VideoEditView: View {
             .padding()
             
             HStack {
-                Button("Cancel") {
-                    featureType = .none
-                }
-                
                 Button("Done") {
                     guard let avAsset else { return }
+                    isProgressView.toggle()
                     switch featureType {
                     case .none: break
                     case .effect:
-                        videoEditorManager.addEffectToVideo(avAsset, effectName: filterName.name) { url in
-                            updatePlayer(url)
+                        videoEditorManager.addEffectToVideo(avAsset, effectName: filterName.name) { url, error in
+                            updatePlayer(url, error: error)
                         }
                     case .trim:
-                        videoEditorManager.trimVideo(avAsset, startTime: startTime, endTime: endTime) { url in
-                            updatePlayer(url)
+                        videoEditorManager.trimVideo(avAsset, startTime: startTime, endTime: endTime) { url, error in
+                            updatePlayer(url, error: error)
                         }
                     case .addText:
-                        guard !textToVideo.isEmpty else { return }
-                        videoEditorManager.addTextToVideo(avAsset, title: textToVideo, startTime: startTime, endTime: endTime) { url in
-                            updatePlayer(url)
+                        guard !textToVideo.isEmpty && asset != nil else {
+                            isProgressView.toggle()
+                            return
+                        }
+                        var avAssets: [AVAsset] = [avAsset]
+                        let textData = TextData(text: textToVideo,
+                                                fontSize: 80,
+                                                textColor: UIColor.green,
+                                                showTime: 3,
+                                                endTime: 14,
+                                                textFrame: CGRect(x: 100, y: 50, width: 800, height: 500))
+                        assetUrls.forEach {
+                            avAssets.append(AVAsset(url: $0))
+                        }
+                        
+                        videoEditorManager.addTextToVideo(avAssets, textData: [textData]) { url, error in
+                            updatePlayer(url, error: error)
                         }
                     case .addAudio:
-                        let avAudioAsset = AVAsset(url: Bundle.main.url(forResource: "sampleAudio", withExtension: "mp3")!)
-                        videoEditorManager.addAudioToVideo(avAsset, audioAsset: avAudioAsset) { url in
-                            updatePlayer(url)
+                        guard let selectedAudioURL else { return }
+                        let avAudioAsset = AVAsset(url: selectedAudioURL)
+                        videoEditorManager.mergeAudioToVideo(avAsset, audioAsset: avAudioAsset) { url, error in
+                            updatePlayer(url, error: error)
                         }
                     case .mergeVideos:
-                        let avAsset2 = AVAsset(url: Bundle.main.url(forResource: "sampleVideo2", withExtension: "mp4")!)
-                        videoEditorManager.mergeTwoVideos([avAsset, avAsset2]) { url in
-                            updatePlayer(url)
+                        var avAssets: [AVAsset] = [avAsset]
+                        assetUrls.forEach {
+                            avAssets.append(AVAsset(url: $0))
+                        }
+                        videoEditorManager.mergeVideos(arrayVideos: avAssets, animation: true) { url, error in
+                            updatePlayer(url, error: error)
                         }
                     }
                 }
@@ -129,12 +198,18 @@ struct VideoEditView: View {
         }
         .navigationTitle("Edit Video")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $isDocumentPicker) {
+            DocumentPickerView(selectedAudioURL: $selectedAudioURL, isPresented: $isDocumentPicker)
+        }
+        .sheet(isPresented: $isImagePicker) {
+            VideoPicker(assets: $phAssets, assetUrls: $assetUrls)
+        }
         .onAppear {
             if let asset {
                 requestPlayerItem(asset.asset)
                 asset.requestAVAsset { avAsset in
                     self.avAsset = avAsset
-                    endTime = avAsset.fullRange.duration
+                    endTime = avAsset.fullRange.duration // CMTime(seconds: 60.0, preferredTimescale: Int32(1))
                 }
             }
         }
@@ -157,14 +232,22 @@ struct VideoEditView: View {
         })
     }
     
-    private func updatePlayer(_ url: URL) {
+    private func updatePlayer(_ url: URL?, error: Error?) {
+        isProgressView.toggle()
+        guard url != nil && error == nil else {
+            if let error {
+                print("Error: \(error.localizedDescription)")
+            }
+            return
+        }
+        
         featureType = .none
         player?.pause()
-        player = AVPlayer(url: url)
+        player = AVPlayer(url: url!)
         player?.seek(to: .zero) { success in
             player?.play()
         }
         self.assetUrl = url
-        self.avAsset = AVAsset(url: url)
+        self.avAsset = AVAsset(url: url!)
     }
 }

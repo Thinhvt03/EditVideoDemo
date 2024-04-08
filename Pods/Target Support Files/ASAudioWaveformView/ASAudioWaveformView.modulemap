@@ -1,0 +1,6 @@
+framework module ASAudioWaveformView {
+  umbrella header "ASAudioWaveformView-umbrella.h"
+
+  export *
+  module * { export * }
+}

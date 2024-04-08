@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8224A81D2BC1810B00962D47 /* DocumentPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8224A81C2BC1810B00962D47 /* DocumentPickerView.swift */; };
 		8253DAB12BBAFD50007CD04C /* EffectName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8253DAB02BBAFD50007CD04C /* EffectName.swift */; };
 		8253DAB32BBC16B0007CD04C /* sampleVideo2.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 8253DAB22BBC16B0007CD04C /* sampleVideo2.mp4 */; };
 		8253DAB52BBC5FC6007CD04C /* sampleVideo3.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 8253DAB42BBC5FC6007CD04C /* sampleVideo3.mp4 */; };
@@ -24,9 +25,17 @@
 		827BD78F2BB5300F00FBAFBB /* PhotoLibraryPermissionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 827BD78E2BB5300F00FBAFBB /* PhotoLibraryPermissionManager.swift */; };
 		827BD7962BB6A46C00FBAFBB /* VideoTrimmerThumb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 827BD7952BB6A46C00FBAFBB /* VideoTrimmerThumb.swift */; };
 		827BD7982BB6A48700FBAFBB /* VideoTrimmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 827BD7972BB6A48700FBAFBB /* VideoTrimmer.swift */; };
+		8294ADD62BBEDBBB002BABA6 /* TextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8294ADD52BBEDBBB002BABA6 /* TextView.swift */; };
+		82FEEA662BC3FDA800DB60E5 /* silence.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 82FEEA652BC3FDA800DB60E5 /* silence.mp3 */; };
+		82FEEA682BC405AD00DB60E5 /* landscape.MOV in Resources */ = {isa = PBXBuildFile; fileRef = 82FEEA672BC405AD00DB60E5 /* landscape.MOV */; };
+		82FEEA6A2BC405B800DB60E5 /* portrait.MOV in Resources */ = {isa = PBXBuildFile; fileRef = 82FEEA692BC405B800DB60E5 /* portrait.MOV */; };
+		82FEEA6C2BC418E400DB60E5 /* ImagePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82FEEA6B2BC418E400DB60E5 /* ImagePickerView.swift */; };
+		82FEEA6E2BC4310A00DB60E5 /* black.mov in Resources */ = {isa = PBXBuildFile; fileRef = 82FEEA6D2BC4310A00DB60E5 /* black.mov */; };
+		EB5949F7DBA9758E5981BF9B /* Pods_EditVideoDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AD3A2BBBCD6B0159EB633A80 /* Pods_EditVideoDemo.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		8224A81C2BC1810B00962D47 /* DocumentPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPickerView.swift; sourceTree = "<group>"; };
 		8253DAB02BBAFD50007CD04C /* EffectName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EffectName.swift; sourceTree = "<group>"; };
 		8253DAB22BBC16B0007CD04C /* sampleVideo2.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = sampleVideo2.mp4; sourceTree = "<group>"; };
 		8253DAB42BBC5FC6007CD04C /* sampleVideo3.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = sampleVideo3.mp4; sourceTree = "<group>"; };
@@ -45,6 +54,15 @@
 		827BD78E2BB5300F00FBAFBB /* PhotoLibraryPermissionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryPermissionManager.swift; sourceTree = "<group>"; };
 		827BD7952BB6A46C00FBAFBB /* VideoTrimmerThumb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoTrimmerThumb.swift; sourceTree = "<group>"; };
 		827BD7972BB6A48700FBAFBB /* VideoTrimmer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoTrimmer.swift; sourceTree = "<group>"; };
+		8294ADD52BBEDBBB002BABA6 /* TextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextView.swift; sourceTree = "<group>"; };
+		82FEEA652BC3FDA800DB60E5 /* silence.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = silence.mp3; sourceTree = "<group>"; };
+		82FEEA672BC405AD00DB60E5 /* landscape.MOV */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = landscape.MOV; sourceTree = "<group>"; };
+		82FEEA692BC405B800DB60E5 /* portrait.MOV */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = portrait.MOV; sourceTree = "<group>"; };
+		82FEEA6B2BC418E400DB60E5 /* ImagePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePickerView.swift; sourceTree = "<group>"; };
+		82FEEA6D2BC4310A00DB60E5 /* black.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = black.mov; sourceTree = "<group>"; };
+		98DE53898470403DC37B06C5 /* Pods-EditVideoDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EditVideoDemo.debug.xcconfig"; path = "Target Support Files/Pods-EditVideoDemo/Pods-EditVideoDemo.debug.xcconfig"; sourceTree = "<group>"; };
+		AD3A2BBBCD6B0159EB633A80 /* Pods_EditVideoDemo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_EditVideoDemo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EC15D601E69D1962AA5AB7EB /* Pods-EditVideoDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EditVideoDemo.release.xcconfig"; path = "Target Support Files/Pods-EditVideoDemo/Pods-EditVideoDemo.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +70,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EB5949F7DBA9758E5981BF9B /* Pods_EditVideoDemo.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -74,6 +93,8 @@
 			children = (
 				827BD7792BB50DB500FBAFBB /* EditVideoDemo */,
 				827BD7782BB50DB500FBAFBB /* Products */,
+				978F26D577B1DE7098D69DEB /* Pods */,
+				CB5A08A5576319F122E29F04 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -92,13 +113,20 @@
 				82553C992BB6D12C0070B540 /* VideoCollectionView.swift */,
 				827BD7882BB50DD500FBAFBB /* VideoEditView.swift */,
 				827BD77C2BB50DB500FBAFBB /* VideoTrimControlView.swift */,
+				8294ADD52BBEDBBB002BABA6 /* TextView.swift */,
+				8224A81C2BC1810B00962D47 /* DocumentPickerView.swift */,
+				82FEEA6B2BC418E400DB60E5 /* ImagePickerView.swift */,
 				82553C962BB6AD8A0070B540 /* Model */,
 				827BD7942BB6A44D00FBAFBB /* VideoTrimmerControl */,
 				827BD78E2BB5300F00FBAFBB /* PhotoLibraryPermissionManager.swift */,
 				827BD78A2BB50E7E00FBAFBB /* sampleVideo.mp4 */,
 				8253DAB22BBC16B0007CD04C /* sampleVideo2.mp4 */,
 				8253DAB42BBC5FC6007CD04C /* sampleVideo3.mp4 */,
+				82FEEA672BC405AD00DB60E5 /* landscape.MOV */,
+				82FEEA692BC405B800DB60E5 /* portrait.MOV */,
+				82FEEA6D2BC4310A00DB60E5 /* black.mov */,
 				82553CC32BB94C160070B540 /* sampleAudio.mp3 */,
+				82FEEA652BC3FDA800DB60E5 /* silence.mp3 */,
 				827BD77E2BB50DB700FBAFBB /* Assets.xcassets */,
 				827BD7802BB50DB700FBAFBB /* Preview Content */,
 			);
@@ -122,6 +150,23 @@
 			path = VideoTrimmerControl;
 			sourceTree = "<group>";
 		};
+		978F26D577B1DE7098D69DEB /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				98DE53898470403DC37B06C5 /* Pods-EditVideoDemo.debug.xcconfig */,
+				EC15D601E69D1962AA5AB7EB /* Pods-EditVideoDemo.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		CB5A08A5576319F122E29F04 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				AD3A2BBBCD6B0159EB633A80 /* Pods_EditVideoDemo.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -129,9 +174,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 827BD7852BB50DB700FBAFBB /* Build configuration list for PBXNativeTarget "EditVideoDemo" */;
 			buildPhases = (
+				AC32222ECFDB6E795D963A26 /* [CP] Check Pods Manifest.lock */,
 				827BD7732BB50DB500FBAFBB /* Sources */,
 				827BD7742BB50DB500FBAFBB /* Frameworks */,
 				827BD7752BB50DB500FBAFBB /* Resources */,
+				07F738EC662261F05344F929 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -180,8 +227,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				82FEEA682BC405AD00DB60E5 /* landscape.MOV in Resources */,
 				827BD7822BB50DB700FBAFBB /* Preview Assets.xcassets in Resources */,
 				8253DAB32BBC16B0007CD04C /* sampleVideo2.mp4 in Resources */,
+				82FEEA6A2BC405B800DB60E5 /* portrait.MOV in Resources */,
+				82FEEA6E2BC4310A00DB60E5 /* black.mov in Resources */,
+				82FEEA662BC3FDA800DB60E5 /* silence.mp3 in Resources */,
 				827BD78B2BB50E7E00FBAFBB /* sampleVideo.mp4 in Resources */,
 				827BD77F2BB50DB700FBAFBB /* Assets.xcassets in Resources */,
 				8253DAB52BBC5FC6007CD04C /* sampleVideo3.mp4 in Resources */,
@@ -190,6 +241,48 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		07F738EC662261F05344F929 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-EditVideoDemo/Pods-EditVideoDemo-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-EditVideoDemo/Pods-EditVideoDemo-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-EditVideoDemo/Pods-EditVideoDemo-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		AC32222ECFDB6E795D963A26 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-EditVideoDemo-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		827BD7732BB50DB500FBAFBB /* Sources */ = {
@@ -200,11 +293,14 @@
 				827BD77D2BB50DB500FBAFBB /* VideoTrimControlView.swift in Sources */,
 				8253DAB12BBAFD50007CD04C /* EffectName.swift in Sources */,
 				82553CC22BB90CAD0070B540 /* PhotoLibraryManager.swift in Sources */,
+				82FEEA6C2BC418E400DB60E5 /* ImagePickerView.swift in Sources */,
 				82553C9C2BB6D3B80070B540 /* Asset.swift in Sources */,
 				82553C9A2BB6D12C0070B540 /* VideoCollectionView.swift in Sources */,
+				8224A81D2BC1810B00962D47 /* DocumentPickerView.swift in Sources */,
 				827BD7962BB6A46C00FBAFBB /* VideoTrimmerThumb.swift in Sources */,
 				827BD7982BB6A48700FBAFBB /* VideoTrimmer.swift in Sources */,
 				827BD77B2BB50DB500FBAFBB /* EditVideoDemoApp.swift in Sources */,
+				8294ADD62BBEDBBB002BABA6 /* TextView.swift in Sources */,
 				827BD7892BB50DD500FBAFBB /* VideoEditView.swift in Sources */,
 				82553C982BB6ADD10070B540 /* VideoEditorManager.swift in Sources */,
 			);
@@ -334,13 +430,18 @@
 		};
 		827BD7862BB50DB700FBAFBB /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 98DE53898470403DC37B06C5 /* Pods-EditVideoDemo.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"EditVideoDemo/Preview Content\"";
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = GU77RDMYJU;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "allow photo library access";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -354,8 +455,10 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.demo.EditVideoDemo;
+				PRODUCT_BUNDLE_IDENTIFIER = com.smarttech.CleaneriOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = SmartTechWildcard;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -364,13 +467,18 @@
 		};
 		827BD7872BB50DB700FBAFBB /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EC15D601E69D1962AA5AB7EB /* Pods-EditVideoDemo.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"EditVideoDemo/Preview Content\"";
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = GU77RDMYJU;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "allow photo library access";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -384,8 +492,10 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.demo.EditVideoDemo;
+				PRODUCT_BUNDLE_IDENTIFIER = com.smarttech.CleaneriOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = SmartTechWildcard;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

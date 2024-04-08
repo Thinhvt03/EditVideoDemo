@@ -1,0 +1,16 @@
+PODS:
+  - ASAudioWaveformView (1.0.4)
+
+DEPENDENCIES:
+  - ASAudioWaveformView
+
+SPEC REPOS:
+  trunk:
+    - ASAudioWaveformView
+
+SPEC CHECKSUMS:
+  ASAudioWaveformView: 74c46a88a34dd0320a3f145a07df3d02d30ae6e9
+
+PODFILE CHECKSUM: 26c682e9c4f77c85f24f45a76e2e9154b1268a20
+
+COCOAPODS: 1.15.2
