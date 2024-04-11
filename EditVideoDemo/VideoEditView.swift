@@ -100,17 +100,18 @@ struct VideoEditView: View {
                     LazyHGrid(rows: [GridItem(.fixed(20))], spacing: 1) {
                         ForEach(phAssets, id: \.self) { asset in
                             VideoGridItem(asset: Asset(asset: asset))
-                                .aspectRatio(1, contentMode: .fill)
                                 .frame(width: 60, height: 60)
                                 .clipped()
                         }
                     }
                 }
+                .frame(width: 60, height: 60)
             case .addAudio:
                 VStack {
                     Button("Select Audio") {
                         isDocumentPicker.toggle()
                     }
+                    .buttonStyle(.borderedProminent)
                     
                     if selectedAudioURL != nil {
                         AudioWaveformView(url: $selectedAudioURL, isLoading: $isWaveformView)
@@ -121,7 +122,7 @@ struct VideoEditView: View {
                                     ProgressView()
                                 }
                             }
-                            .padding()
+                            .padding([.top, .vertical])
                     }
                 }
             }
@@ -159,7 +160,8 @@ struct VideoEditView: View {
                                                 textColor: UIColor.green,
                                                 showTime: 3,
                                                 endTime: 14,
-                                                textFrame: CGRect(x: 100, y: 50, width: 800, height: 500))
+                                                textFrame: CGRect(origin: textLocation, size: textSize)  // CGRect(x: 100, y: 50, width: 800, height: 500)
+                        )
                         assetUrls.forEach {
                             avAssets.append(AVAsset(url: $0))
                         }
@@ -209,7 +211,6 @@ struct VideoEditView: View {
                 requestPlayerItem(asset.asset)
                 asset.requestAVAsset { avAsset in
                     self.avAsset = avAsset
-                    endTime = avAsset.fullRange.duration // CMTime(seconds: 60.0, preferredTimescale: Int32(1))
                 }
             }
         }

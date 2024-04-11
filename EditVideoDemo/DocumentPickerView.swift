@@ -36,8 +36,8 @@ struct DocumentPickerView: UIViewControllerRepresentable {
         
         func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
             guard let url = urls.first else { return }
-            parent.selectedAudioURL = url
-            parent.isPresented = false
+            self.parent.selectedAudioURL = url
+            self.parent.isPresented = false
         }
         
         func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {

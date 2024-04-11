@@ -27,10 +27,7 @@
 		827BD7982BB6A48700FBAFBB /* VideoTrimmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 827BD7972BB6A48700FBAFBB /* VideoTrimmer.swift */; };
 		8294ADD62BBEDBBB002BABA6 /* TextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8294ADD52BBEDBBB002BABA6 /* TextView.swift */; };
 		82FEEA662BC3FDA800DB60E5 /* silence.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 82FEEA652BC3FDA800DB60E5 /* silence.mp3 */; };
-		82FEEA682BC405AD00DB60E5 /* landscape.MOV in Resources */ = {isa = PBXBuildFile; fileRef = 82FEEA672BC405AD00DB60E5 /* landscape.MOV */; };
-		82FEEA6A2BC405B800DB60E5 /* portrait.MOV in Resources */ = {isa = PBXBuildFile; fileRef = 82FEEA692BC405B800DB60E5 /* portrait.MOV */; };
 		82FEEA6C2BC418E400DB60E5 /* ImagePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82FEEA6B2BC418E400DB60E5 /* ImagePickerView.swift */; };
-		82FEEA6E2BC4310A00DB60E5 /* black.mov in Resources */ = {isa = PBXBuildFile; fileRef = 82FEEA6D2BC4310A00DB60E5 /* black.mov */; };
 		EB5949F7DBA9758E5981BF9B /* Pods_EditVideoDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AD3A2BBBCD6B0159EB633A80 /* Pods_EditVideoDemo.framework */; };
 /* End PBXBuildFile section */
 
@@ -56,10 +53,7 @@
 		827BD7972BB6A48700FBAFBB /* VideoTrimmer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoTrimmer.swift; sourceTree = "<group>"; };
 		8294ADD52BBEDBBB002BABA6 /* TextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextView.swift; sourceTree = "<group>"; };
 		82FEEA652BC3FDA800DB60E5 /* silence.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = silence.mp3; sourceTree = "<group>"; };
-		82FEEA672BC405AD00DB60E5 /* landscape.MOV */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = landscape.MOV; sourceTree = "<group>"; };
-		82FEEA692BC405B800DB60E5 /* portrait.MOV */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = portrait.MOV; sourceTree = "<group>"; };
 		82FEEA6B2BC418E400DB60E5 /* ImagePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePickerView.swift; sourceTree = "<group>"; };
-		82FEEA6D2BC4310A00DB60E5 /* black.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = black.mov; sourceTree = "<group>"; };
 		98DE53898470403DC37B06C5 /* Pods-EditVideoDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EditVideoDemo.debug.xcconfig"; path = "Target Support Files/Pods-EditVideoDemo/Pods-EditVideoDemo.debug.xcconfig"; sourceTree = "<group>"; };
 		AD3A2BBBCD6B0159EB633A80 /* Pods_EditVideoDemo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_EditVideoDemo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EC15D601E69D1962AA5AB7EB /* Pods-EditVideoDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EditVideoDemo.release.xcconfig"; path = "Target Support Files/Pods-EditVideoDemo/Pods-EditVideoDemo.release.xcconfig"; sourceTree = "<group>"; };
@@ -122,9 +116,6 @@
 				827BD78A2BB50E7E00FBAFBB /* sampleVideo.mp4 */,
 				8253DAB22BBC16B0007CD04C /* sampleVideo2.mp4 */,
 				8253DAB42BBC5FC6007CD04C /* sampleVideo3.mp4 */,
-				82FEEA672BC405AD00DB60E5 /* landscape.MOV */,
-				82FEEA692BC405B800DB60E5 /* portrait.MOV */,
-				82FEEA6D2BC4310A00DB60E5 /* black.mov */,
 				82553CC32BB94C160070B540 /* sampleAudio.mp3 */,
 				82FEEA652BC3FDA800DB60E5 /* silence.mp3 */,
 				827BD77E2BB50DB700FBAFBB /* Assets.xcassets */,
@@ -227,11 +218,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				82FEEA682BC405AD00DB60E5 /* landscape.MOV in Resources */,
 				827BD7822BB50DB700FBAFBB /* Preview Assets.xcassets in Resources */,
 				8253DAB32BBC16B0007CD04C /* sampleVideo2.mp4 in Resources */,
-				82FEEA6A2BC405B800DB60E5 /* portrait.MOV in Resources */,
-				82FEEA6E2BC4310A00DB60E5 /* black.mov in Resources */,
 				82FEEA662BC3FDA800DB60E5 /* silence.mp3 in Resources */,
 				827BD78B2BB50E7E00FBAFBB /* sampleVideo.mp4 in Resources */,
 				827BD77F2BB50DB700FBAFBB /* Assets.xcassets in Resources */,
