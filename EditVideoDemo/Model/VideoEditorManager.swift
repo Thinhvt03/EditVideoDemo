@@ -39,12 +39,12 @@ class VideoEditorManager: NSObject {
         }
     }
     
-    func addTextToVideo(_ avAssets: [AVAsset], textData: [TextData]?, completionHandler: @escaping (URL?, Error?) -> Void) {
+    func addTextToVideo(_ videoAsset: AVAsset, textData: [TextData]?, completionHandler: @escaping (URL?, Error?) -> Void) {
         var insertTime = CMTime.zero
         var arrayLayerInstructions: [AVMutableVideoCompositionLayerInstruction] = []
         let mixComposition = AVMutableComposition()
         var arrayLayerImages: [CALayer] = []
- 
+        
         // Silence sound (in case video has no sound track)
         guard let silenceURL = Bundle.main.url(forResource: "silence", withExtension: "mp3") else {
             print("Missing resource")
@@ -54,79 +54,81 @@ class VideoEditorManager: NSObject {
         
         let silenceAsset = AVAsset(url:silenceURL)
         let silenceSoundTrack = silenceAsset.tracks(withMediaType: AVMediaType.audio).first
- 
-        avAssets.forEach { videoAsset in
-            var audioTrack: AVAssetTrack?
-            guard let videoTrack = videoAsset.tracks(withMediaType: AVMediaType.video).first else { return }
+        
+        var audioTrack: AVAssetTrack?
+        guard let videoTrack = videoAsset.tracks(withMediaType: AVMediaType.video).first else { return }
+        
+        if videoAsset.tracks(withMediaType: AVMediaType.audio).count > 0 {
+            audioTrack = videoAsset.tracks(withMediaType: AVMediaType.audio).first
+        } else {
+            audioTrack = silenceSoundTrack
+        }
+        
+        let videoCompositionTrack = mixComposition.addMutableTrack(
+            withMediaType: .video,
+            preferredTrackID: Int32(kCMPersistentTrackID_Invalid)
+        )
+        let audioCompositionTrack = mixComposition.addMutableTrack(
+            withMediaType: .audio,
+            preferredTrackID: Int32(kCMPersistentTrackID_Invalid)
+        )
+        
+        let naturalSize = CGSize(width: videoTrack.naturalSize.width,
+                                 height: videoTrack.naturalSize.height)
+        
+        do {
+            let startTime = CMTime.zero
+            let duration = videoAsset.duration
             
-            if videoAsset.tracks(withMediaType: AVMediaType.audio).count > 0 {
-                audioTrack = videoAsset.tracks(withMediaType: AVMediaType.audio).first
-            } else {
-                audioTrack = silenceSoundTrack
+            try videoCompositionTrack?.insertTimeRange(CMTimeRangeMake(start: startTime, duration: duration),
+                                                       of: videoTrack, at: insertTime)
+            if let audioTrack = audioTrack {
+                try audioCompositionTrack?.insertTimeRange(CMTimeRangeMake(start: startTime, duration: duration),
+                                                           of: audioTrack, at: insertTime)
             }
             
-            let videoCompositionTrack = mixComposition.addMutableTrack(
-                withMediaType: .video,
-                preferredTrackID: Int32(kCMPersistentTrackID_Invalid)
-            )
-            let audioCompositionTrack = mixComposition.addMutableTrack(
-                withMediaType: .audio,
-                preferredTrackID: Int32(kCMPersistentTrackID_Invalid)
-            )
-            
-            do {
-                let startTime = CMTime.zero
-                let duration = videoAsset.duration
+            if let videoCompositionTrack = videoCompositionTrack {
+                let layerInstruction = videoCompositionInstructionForTrack(track: videoCompositionTrack,
+                                                                           asset: videoAsset, targetSize: naturalSize)
+                let videoEndTime = CMTimeAdd(insertTime, duration)
+                let durationAnimation = 1.0.toCMTime()
                 
-                try videoCompositionTrack?.insertTimeRange(CMTimeRangeMake(start: startTime, duration: duration),
-                                                           of: videoTrack, at: insertTime)
-                if let audioTrack = audioTrack {
-                    try audioCompositionTrack?.insertTimeRange(CMTimeRangeMake(start: startTime, duration: duration),
-                                                               of: audioTrack, at: insertTime)
-                }
+                // Set opacity during video transfer
+                layerInstruction.setOpacityRamp(fromStartOpacity: 1.0, toEndOpacity: 0.0,
+                                                timeRange: CMTimeRange(start: videoEndTime, duration: durationAnimation))
                 
-                if let videoCompositionTrack = videoCompositionTrack {
-                    let layerInstruction = videoCompositionInstructionForTrack(track: videoCompositionTrack,
-                                                                               asset: videoAsset, targetSize: defaultSize2)
-                    let videoEndTime = CMTimeAdd(insertTime, duration)
-                    let durationAnimation = 1.0.toCMTime()
-                    
-                    // Set opacity during video transfer
-                    layerInstruction.setOpacityRamp(fromStartOpacity: 1.0, toEndOpacity: 0.0,
-                                                    timeRange: CMTimeRange(start: videoEndTime, duration: durationAnimation))
-                    
-                    arrayLayerInstructions.append(layerInstruction)
-                }
-                
-                insertTime = CMTimeAdd(insertTime, duration)
-            } catch {
-                print("Load track error")
+                arrayLayerInstructions.append(layerInstruction)
             }
+            
+            insertTime = CMTimeAdd(insertTime, duration)
+        } catch {
+            print("Load track error")
         }
         
         let videoLayer = CALayer()
         let parentlayer = CALayer()
-        videoLayer.frame = CGRect(x: 0, y: 0, width: defaultSize2.width, height: defaultSize2.height)
-        parentlayer.frame = CGRect(x: 0, y: 0, width: defaultSize2.width, height: defaultSize2.height)
+        videoLayer.frame = CGRect(origin: .zero, size: naturalSize)
+        parentlayer.frame = CGRect(origin: .zero, size: naturalSize)
         parentlayer.addSublayer(videoLayer)
         
         // Add Image layers
         for imageLayer in arrayLayerImages {
-//            imageLayer.contents = image.cgImage
+//          imageLayer.contents = image.cgImage
             parentlayer.addSublayer(imageLayer)
         }
         
         // Add Text layer
         if let textData = textData {
             for aTextData in textData {
-                let scale = defaultSize2.height / 300
-                let frame = CGRect(x: Int(aTextData.textFrame.origin.x * scale),
-                                   y: Int(aTextData.textFrame.origin.y * scale),
-                                   width: Int(aTextData.textFrame.width * scale),
-                                   height: Int(aTextData.textFrame.height * scale))
+                let tyScale = naturalSize.height / 300
+                let txScale = naturalSize.width / UIScreen.main.bounds.width
+                let frame = CGRect(x: Int(aTextData.textFrame.origin.x * txScale),
+                                   y: Int(aTextData.textFrame.origin.y * tyScale),
+                                   width: Int(aTextData.textFrame.width * txScale),
+                                   height: Int(aTextData.textFrame.height * tyScale))
                 
                 let textLayer = makeTextLayer(string: aTextData.text,
-                                              fontSize: aTextData.fontSize,
+                                              fontSize: aTextData.fontSize * txScale,
                                               textColor: UIColor.green,
                                               frame: frame,    //  aTextData.textFrame
                                               showTime: aTextData.showTime,
@@ -144,7 +146,7 @@ class VideoEditorManager: NSObject {
         let mainComposition = AVMutableVideoComposition()
         mainComposition.instructions = [mainInstruction]
         mainComposition.frameDuration = CMTimeMake(value: 1, timescale: 30)
-        mainComposition.renderSize = defaultSize2
+        mainComposition.renderSize = naturalSize
         mainComposition.animationTool = AVVideoCompositionCoreAnimationTool(postProcessingAsVideoLayer: videoLayer, in: parentlayer)
         
         // Export Session
@@ -219,7 +221,7 @@ class VideoEditorManager: NSObject {
         }
     }
     
-    func mergeVideos(arrayVideos:[AVAsset], animation:Bool, completionHandler: @escaping (URL?, Error?) -> Void) {
+    func mergeVideos(arrayVideos: [AVAsset], animation: Bool, mergeType: MergeType, completionHandler: @escaping (URL?, Error?) -> Void) {
         var insertTime = CMTime.zero
         var arrayLayerInstructions: [AVMutableVideoCompositionLayerInstruction] = []
 
@@ -255,43 +257,76 @@ class VideoEditorManager: NSObject {
             )
             
             do {
-                let startTime = CMTime.zero
+                var startTime = CMTime.zero
                 let duration = videoAsset.duration
                 
-                try videoCompositionTrack?.insertTimeRange(CMTimeRangeMake(start: startTime, duration: duration),
+                if mergeType == .contemporary && videoAsset == arrayVideos[0] {
+                    startTime = 3.toCMTime()
+                } else {
+                    startTime = .zero
+                }
+     
+                try videoCompositionTrack?.insertTimeRange(CMTimeRangeMake(start: .zero, duration: duration),
                                                            of: videoTrack,
-                                                           at: .zero)
+                                                           at: mergeType == .serial ? insertTime : startTime)
                 if let audioTrack = audioTrack {
-                    try audioCompositionTrack?.insertTimeRange(CMTimeRangeMake(start: startTime, duration: duration),
+                    try audioCompositionTrack?.insertTimeRange(CMTimeRangeMake(start: .zero, duration: duration),
                                                                of: audioTrack,
-                                                               at: .zero)
+                                                               at: mergeType == .serial ? insertTime : startTime)
                 }
                 
                 // Add instruction for video track
                 if let videoCompositionTrack = videoCompositionTrack {
-                    // TH1: Merge consecutive videos
-//                    targetSize = videoTrack.naturalSize.width > videoTrack.naturalSize.height ? defaultSize2 : defaultSize1
-                    
-                    // TH2: Merge videos simultaneously
-                    var targetSize = defaultSize2
-                    if videoAsset == arrayVideos[0] {
-                        targetSize = defaultSize1
+                    var targetSize = defaultSize1
+                    var layerInstruction: AVMutableVideoCompositionLayerInstruction!
+                    // TH1: Merge serial videos
+                    if mergeType == .serial {
+                        targetSize = videoTrack.naturalSize.width > videoTrack.naturalSize.height ? defaultSize2 : defaultSize1
+                        layerInstruction = videoCompositionInstructionForTrack(track: videoCompositionTrack, asset: videoAsset, targetSize: targetSize)
+                    } else {
+                        // TH2: Merge videos simultaneously
+                        if videoAsset == arrayVideos.last {
+                            targetSize = defaultSize2
+                            layerInstruction = videoCompositionInstructionForTrack(track: videoCompositionTrack, asset: videoAsset, targetSize: targetSize)
+                        } else {
+                            targetSize = defaultSize1
+                            layerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: videoTrack)
+                            let scaleToFitRatio = targetSize.width / videoTrack.naturalSize.width
+                            let transform = videoTrack.fixedPreferredTransform
+                            // Scale to fit target size
+                            let scaleFactor = CGAffineTransform(scaleX: scaleToFitRatio, y: scaleToFitRatio)
+                            
+                            // Align center Y
+                            let newY = targetSize.height / 2 - (videoTrack.naturalSize.height * scaleToFitRatio) / 2
+                            let moveCenterFactor = CGAffineTransform(translationX: 500, y: newY)
+                            
+                            let finalTransform = transform.concatenating(scaleFactor).concatenating(moveCenterFactor)
+                            
+                            layerInstruction.setTransform(finalTransform, at: .zero)
+                        }
                     }
                     
-                    let layerInstruction = videoCompositionInstructionForTrack(track: videoCompositionTrack, asset: videoAsset, targetSize: targetSize)
-                    
-                    // Hide video track before changing to new track
-                    let endTime = CMTimeAdd(insertTime, duration)
-                    
-                    if animation {
-                        let durationAnimation = 1.0.toCMTime()
-                        
-                        layerInstruction.setOpacityRamp(fromStartOpacity: 1.0, toEndOpacity: 0.0, timeRange: CMTimeRange(start: endTime, duration: durationAnimation))
+                    // animation video
+                    if mergeType == .serial {
+                        let endTime = CMTimeAdd(insertTime, duration)
+                        if animation {
+                            let durationAnimation = 1.0.toCMTime()
+                            // Hide video track before changing to new track
+                            layerInstruction.setOpacityRamp(fromStartOpacity: 1.0, toEndOpacity: 0.0, timeRange: CMTimeRange(start: endTime, duration: durationAnimation))
+                        } else {
+                            layerInstruction.setOpacity(0, at: endTime)
+                        }
+                    } else {
+                        if animation && videoAsset != arrayVideos.last {
+                            let endTime = 10.toCMTime()
+                            let durationAnimation = 1.0.toCMTime()
+                            // show video
+                            layerInstruction.setOpacityRamp(fromStartOpacity: 0.0, toEndOpacity: 1.0, timeRange: CMTimeRange(start: startTime, duration: durationAnimation))
+                            // hide video
+                            layerInstruction.setOpacityRamp(fromStartOpacity: 1.0, toEndOpacity: 0.0, timeRange: CMTimeRange(start: endTime, duration: durationAnimation))
+                        }
                     }
-                    else {
-                        layerInstruction.setOpacity(0, at: endTime)
-                    }
-                    
+
                     arrayLayerInstructions.append(layerInstruction)
                 }
                 
@@ -356,15 +391,17 @@ class VideoEditorManager: NSObject {
     
     func deleteTempDirectory() {
         let tempDirectory = NSTemporaryDirectory()
-        let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
+        let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
         do {
-            let fileURLs = try FileManager.default.contentsOfDirectory(at: URL.getURL(tempDirectory), includingPropertiesForKeys: nil)
-            guard !fileURLs.isEmpty else { return }
-            for url in fileURLs {
-                try FileManager.default.removeItem(at: url)
-                if let documentsDirectory {
-                    try FileManager.default.removeItem(at: documentsDirectory)
-                }
+            let temporaryDirectoryURLs = try fileManager.contentsOfDirectory(at: URL.getURL(tempDirectory), includingPropertiesForKeys: nil)
+            let documentsDirectoryURLs = try fileManager.contentsOfDirectory(at: documentsDirectory, includingPropertiesForKeys: nil)
+            
+            for url in temporaryDirectoryURLs {
+                try fileManager.removeItem(at: url)
+            }
+            
+            for url in documentsDirectoryURLs {
+                try fileManager.removeItem(at: url)
             }
         } catch {
             print(error.localizedDescription)
@@ -558,6 +595,11 @@ extension URL {
             URL(fileURLWithPath: path)
         }
     }
+}
+
+enum MergeType {
+    case serial
+    case contemporary
 }
 
 struct TextData {

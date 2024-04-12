@@ -38,25 +38,32 @@ struct VideoEditView: View {
     @State private var textToVideo = ""
     @State private var textLocation = CGPoint.zero
     @State private var textSize = CGSize(width: 130, height: 50)
+    @State private var playerViewHeight: CGFloat = 0
+    @State private var isChangedPlayer = false
     
     var body: some View {
         VStack {
-            VideoPlayer(player: player)
-                .frame(height: 300)
-                .overlay {
-                    if featureType == .addText {
-                        TextView(text: $textToVideo, textSize: $textSize, textLocation: $textLocation)
-                    }
-                    
-                    if isProgressView {
-                        ProgressView {
-                            Text("Progressing Video...")
-                                .font(.caption)
+            if player != nil {
+                ZStack {
+                    AVPlayerView(player: $player, isChangedPlayer: $isChangedPlayer)
+                        .frame(height: playerViewHeight)
+                        .overlay {
+                            if featureType == .addText {
+                                TextView(text: $textToVideo, textSize: $textSize, textLocation: $textLocation)
+                            }
+                            
+                            if isProgressView {
+                                ProgressView {
+                                    Text("Progressing Video...")
+                                        .font(.footnote)
+                                        .foregroundStyle(Color.white)
+                                }
+                                .padding()
+                                .background(Color.black.opacity(0.8))
+                            }
                         }
-                            .padding()
-                            .background(Color.black.opacity(0.8))
-                    }
-                }
+                } .padding(.vertical)
+            }
             
             switch featureType {
             case .none: EmptyView()
@@ -67,7 +74,6 @@ struct VideoEditView: View {
                     }
                 }
                 .pickerStyle(.wheel)
-                .padding()
             case .trim:
                 if avAsset != nil && player != nil {
                     VideoTrimControlView(avAsset: avAsset!, player: $player,
@@ -85,7 +91,32 @@ struct VideoEditView: View {
                         .font(.subheadline)
                     }.padding(.horizontal)
                 }
-            case .addText, .mergeVideos:
+            case .addText:
+                EmptyView()
+            case .addAudio:
+                VStack {
+                    Button("Select Audio") {
+                        isDocumentPicker.toggle()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    
+                    if selectedAudioURL != nil {
+                        VStack(alignment: .leading) {
+                            AudioWaveformView(url: $selectedAudioURL, isLoading: $isWaveformView)
+                                .frame(height: 50)
+                                .border(Color.gray, width: 1.0)
+                                .overlay {
+                                    if !isWaveformView {
+                                        ProgressView()
+                                    }
+                                }
+                            Text(selectedAudioURL!.lastPathComponent)
+                                .lineLimit(0)
+                        }
+                        .padding(.horizontal)
+                    }
+                }
+            case .mergeVideos:
                 HStack(spacing: 1) {
                     Color.gray
                         .frame(width: 60, height: 60)
@@ -106,25 +137,6 @@ struct VideoEditView: View {
                     }
                 }
                 .frame(width: 60, height: 60)
-            case .addAudio:
-                VStack {
-                    Button("Select Audio") {
-                        isDocumentPicker.toggle()
-                    }
-                    .buttonStyle(.borderedProminent)
-                    
-                    if selectedAudioURL != nil {
-                        AudioWaveformView(url: $selectedAudioURL, isLoading: $isWaveformView)
-                            .frame(height: 50)
-                            .border(Color.gray, width: 1.0)
-                            .overlay {
-                                if !isWaveformView {
-                                    ProgressView()
-                                }
-                            }
-                            .padding([.top, .vertical])
-                    }
-                }
             }
             
             Picker("Picker", selection: $featureType) {
@@ -154,19 +166,15 @@ struct VideoEditView: View {
                             isProgressView.toggle()
                             return
                         }
-                        var avAssets: [AVAsset] = [avAsset]
                         let textData = TextData(text: textToVideo,
-                                                fontSize: 80,
+                                                fontSize: 30,
                                                 textColor: UIColor.green,
                                                 showTime: 3,
                                                 endTime: 14,
-                                                textFrame: CGRect(origin: textLocation, size: textSize)  // CGRect(x: 100, y: 50, width: 800, height: 500)
+                                                textFrame: CGRect(origin: textLocation, size: textSize)
                         )
-                        assetUrls.forEach {
-                            avAssets.append(AVAsset(url: $0))
-                        }
                         
-                        videoEditorManager.addTextToVideo(avAssets, textData: [textData]) { url, error in
+                        videoEditorManager.addTextToVideo(avAsset, textData: [textData]) { url, error in
                             updatePlayer(url, error: error)
                         }
                     case .addAudio:
@@ -176,12 +184,11 @@ struct VideoEditView: View {
                             updatePlayer(url, error: error)
                         }
                     case .mergeVideos:
-                        var avAssets: [AVAsset] = [avAsset]
-                        assetUrls.forEach {
-                            avAssets.append(AVAsset(url: $0))
-                        }
-                        videoEditorManager.mergeVideos(arrayVideos: avAssets, animation: true) { url, error in
-                            updatePlayer(url, error: error)
+                        self.insertAsset(.contemporary) { mergeType, avAssets in
+                            print("Asset Count: \(avAssets.count)")
+                            videoEditorManager.mergeVideos(arrayVideos: avAssets, animation: true, mergeType: mergeType) { url, error in
+                                updatePlayer(url, error: error)
+                            }
                         }
                     }
                 }
@@ -209,9 +216,6 @@ struct VideoEditView: View {
         .onAppear {
             if let asset {
                 requestPlayerItem(asset.asset)
-                asset.requestAVAsset { avAsset in
-                    self.avAsset = avAsset
-                }
             }
         }
         .onDisappear {
@@ -228,7 +232,15 @@ struct VideoEditView: View {
                                                    resultHandler: { playerItem, _ in
             DispatchQueue.main.async {
                 player = AVPlayer(playerItem: playerItem)
-//                player?.play()
+                if let avAsset = playerItem?.asset {
+                    self.avAsset = avAsset
+                    if let videoTrack = avAsset.tracks.first {
+                        let videoHeight = videoTrack.naturalSize.height
+                        let videoWidth = videoTrack.naturalSize.width
+                        let scale = videoHeight < videoWidth ? videoHeight / videoWidth : videoWidth / videoHeight
+                        playerViewHeight = UIScreen.main.bounds.width * scale
+                    }
+                }
             }
         })
     }
@@ -245,10 +257,26 @@ struct VideoEditView: View {
         featureType = .none
         player?.pause()
         player = AVPlayer(url: url!)
-        player?.seek(to: .zero) { success in
-            player?.play()
-        }
+        isChangedPlayer = true
         self.assetUrl = url
         self.avAsset = AVAsset(url: url!)
+    }
+    
+    private func insertAsset(_ mergeType: MergeType, completionHandle: @escaping (MergeType, [AVAsset]) -> Void) {
+        guard let avAsset else { return }
+        var avAssets: [AVAsset] = [avAsset]
+        var count = 0
+        assetUrls.forEach {
+            if mergeType == .serial {
+                avAssets.append(AVAsset(url: $0))
+            } else {
+                avAssets.insert(AVAsset(url: $0), at: avAssets.count - 1)
+            }
+            count += 1
+        }
+        
+        if count == assetUrls.count {
+            completionHandle(mergeType, avAssets)
+        }
     }
 }

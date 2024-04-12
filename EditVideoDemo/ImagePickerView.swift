@@ -92,7 +92,7 @@ struct VideoPicker: UIViewControllerRepresentable {
             let fileManager = FileManager.default
             guard let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
             else {  return  }
-            let pathComponent = itemURL.lastPathComponent
+            let pathComponent = UUID().uuidString + itemURL.lastPathComponent
             let fileURL = documentsDirectory.appendingPathComponent(pathComponent)
             
             do {
